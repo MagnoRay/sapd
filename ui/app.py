@@ -1,3 +1,8 @@
+import sys
+import os
+
+# Añade la raíz del proyecto al path de Python para evitar errores de importación en Streamlit Cloud
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import time
 import streamlit as st
 from src.convertidor_pdf import convertir_pdf_a_imagenes, cargar_imagen_directa
