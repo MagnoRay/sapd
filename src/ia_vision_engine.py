@@ -20,7 +20,7 @@ def obtener_cliente_genai():
 def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = "Página", intentos_max: int = 3):
     """
     Procesa una sola página (imagen) con Gemini y la estructura según ParteDiarioPaginaEsquema.
-    Aplica reintentos si ocurren errores de cuota (429) o truncamiento de respuesta.
+    Aplica reintentos si ocurren errores de cuota (429), servidores ocupados (503) o truncamiento de respuesta.
     """
     client = obtener_cliente_genai()
 
@@ -34,7 +34,7 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
     3. Debes cruzar la información de manera rigurosa: si un trabajador tiene horas en una columna de fase específica, busca arriba cuál es el código de fase exacto y su descripción de trabajo correspondiente, y asígnalos conjuntamente en 'detalles_fases'.
     4. Genera una fila o elemento independiente por cada fase en la que el trabajador registre horas mayores a cero, garantizando que la descripción y el código de fase correspondan exactamente a lo indicado en la cabecera superior del formato, sin importar si cambia la posición o el diseño en este documento.
     
-    Extrae también la fecha, frente, jefe de grupo, DNI, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas. Si encuentras alguna incongruencia, marca el estado como 'REVISAR' en la observación.
+    Extrae también la fecha, frente, jefe de grupo, DNI, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas. Si encuentras alguna incongruencia, marca el estado 'REVISAR' en la observación.
     """
 
     for intento in range(1, intentos_max + 1):
@@ -68,10 +68,10 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
 
         except Exception as e:
             mensaje_error = str(e)
-            # Manejo de cuota o tasa de refresco (HTTP 429)
-            if "429" in mensaje_error or "RESOURCE_EXHAUSTED" in mensaje_error:
+            # Manejo de cuota (429) o servidores ocupados (503 / UNAVAILABLE) con reintento automático
+            if "429" in mensaje_error or "RESOURCE_EXHAUSTED" in mensaje_error or "503" in mensaje_error or "UNAVAILABLE" in mensaje_error:
                 if intento < intentos_max:
-                    time.sleep(5 * intento)
+                    time.sleep(6 * intento)
                     continue
             if intento == intentos_max:
                 raise RuntimeError(f"Error procesando {nombre_archivo}: {mensaje_error}")
