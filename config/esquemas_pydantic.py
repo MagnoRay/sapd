@@ -1,28 +1,28 @@
-from pydantic import BaseModel, Field
 from typing import List, Optional
+from pydantic import BaseModel, Field
 
-class DetalleFaseTrabajador(BaseModel):
-    columna_fase: Optional[str] = Field(None, description="Columna de fase")
-    fase_codigo: Optional[str] = Field(None, description="Código de fase (ej. CONS280, ADIC416)")
-    descripcion_actividad: Optional[str] = Field(None, description="Descripción de la actividad")
-    horas_hombre_fase: Optional[float] = Field(None, description="Horas hombre en esta fase")
-
-class TrabajadorParteDiario(BaseModel):
-    dni: Optional[str] = Field(None, description="DNI del trabajador")
-    apellidos_nombres: Optional[str] = Field(None, description="Apellidos y nombres")
-    cargo: Optional[str] = Field(None, description="Cargo del trabajador")
-    hora_ingreso: Optional[str] = Field(None, description="Hora de ingreso")
-    hora_salida: Optional[str] = Field(None, description="Hora de salida")
-    horas_normales: Optional[float] = Field(None, description="Horas normales (H.N.)")
-    horas_60: Optional[float] = Field(None, description="Horas al 60%")
-    horas_100: Optional[float] = Field(None, description="Horas al 100%")
-    total_horas: Optional[float] = Field(None, description="Total de horas")
-    detalles_fases: List[DetalleFaseTrabajador] = Field(default_factory=list, description="Desglose por fase")
-    observacion: Optional[str] = Field("OK", description="Observación o estado del registro")
+class RegistroTrabajadorPlano(BaseModel):
+    pagina: Optional[int] = Field(default=1, description="Número de página de origen dentro del PDF")
+    fecha: str = Field(description="Fecha en formato DD/MM/YYYY")
+    turno: str = Field(description="Turno (DIA / NOCHE)")
+    proyecto: str = Field(description="Proyecto u Obra")
+    sector: str = Field(description="Sector u Obra")
+    frente: str = Field(description="Frente de trabajo")
+    jefe_grupo: str = Field(description="Jefe de grupo o capataz")
+    dni_jefe: Optional[str] = Field(default="", description="DNI del Jefe de Grupo si figura")
+    nombres_apellidos: str = Field(description="Apellidos y Nombres del trabajador")
+    dni: str = Field(description="DNI o documento del trabajador")
+    hh: float = Field(description="Total Horas Hombre (HH)")
+    fase: str = Field(description="Código de la fase asignada (ej. LABA-100, VIGIA100, MANT100, etc.)")
+    control_actividad: str = Field(description="Descripción del trabajo correspondiente a la fase registrada")
+    hora_ingreso: str = Field(description="Hora de ingreso (ej. 18:00)")
+    hora_salida: str = Field(description="Hora de salida (ej. 06:00)")
+    hn: float = Field(description="Horas Normales (H.N.)")
+    horas_60: float = Field(default=0.0, description="Horas al 60%")
+    horas_100: float = Field(default=0.0, description="Horas al 100%")
+    total_horas: float = Field(description="Total Horas Reales")
+    estado: str = Field(description="'OK' si todo coincide perfectamente, 'REVISAR' si hay descuadres o ilegibilidad")
+    observaciones: Optional[str] = Field(default="", description="Detalle de la observación si el estado es REVISAR")
 
 class ParteDiarioPaginaEsquema(BaseModel):
-    fecha: Optional[str] = Field(None, description="Fecha del parte diario")
-    frente: Optional[str] = Field(None, description="Frente de obra")
-    jefe_de_grupo: Optional[str] = Field(None, description="Jefe de grupo")
-    # Usamos default_factory=list para evitar que falle si la IA no detecta filas en algún formato distinto
-    trabajadores: List[TrabajadorParteDiario] = Field(default_factory=list, description="Lista de trabajadores extraídos")
+    registros: List[RegistroTrabajadorPlano] = Field(description="Lista de trabajadores registrados en esta página")
