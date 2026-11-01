@@ -28,21 +28,21 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
     prompt = """
     Analiza la imagen adjunta correspondiente a un Parte Diario de Asistencia de personal de construcción.
     
-    INSTRUCCIÓN CRÍTICA DE ASOCIACIÓN EXACTA (MAPEO ENTRE TABLA SUPERIOR E INFERIOR):
-    1. En la parte superior izquierda de la hoja hay una tabla de "DESCRIPCION DE LOS TRABAJOS" numerada por filas de Actividad (Act. 1, Act. 2, Act. 3, Act. 4). Cada una tiene:
-       - Su respectivo **Código de Fase** (ej. 'NVCA 100', 'CONS 280', 'ADIC 416').
-       - Su respectiva **Descripción del Trabajo** (ej. "Perfilado de talud y loza", "Vaciado de loza", "Parada de Seguridad").
-    2. En la parte inferior, la tabla de trabajadores tiene columnas de control de horas etiquetadas como **Fase 01, Fase 02, Fase 03, Fase 04, Fase 05**.
-    3. REGLA DE CORRESPONDENCIA DE COLUMNAS: 
-       - La columna inferior 'Fase 01' corresponde a la Actividad de la fila 1 superior.
-       - La columna inferior 'Fase 02' corresponde a la Actividad de la fila 2 superior.
-       - La columna inferior 'Fase 03' corresponde a la Actividad de la fila 3 superior.
-       - La columna inferior 'Fase 04' corresponde a la Actividad de la fila 4 superior.
-    4. EXTRACCIÓN POR TRABAJADOR: Para cada trabajador, revisa cada columna de fase (Fase 01, Fase 02, etc.). Si el trabajador tiene horas asignadas en dicha columna (por ejemplo, 10 horas en Fase 02 y 1 hora en Fase 03):
-       - Genera un registro independiente en 'detalles_fases' para la Fase 02 con el código y la descripción exacta que le pertenece a la Actividad 2 de la tabla superior.
-       - Genera otro registro independiente para la Fase 03 con el código y la descripción exacta que le pertenece a la Actividad 3 de la tabla superior.
+    INSTRUCCIÓN CRÍTICA DE ASOCIACIÓN Y VALIDACIÓN CRUZADA:
+    1. **TABLA SUPERIOR (ACTIVIDADES Y FASES):** Lee rigurosamente la sección superior de trabajos donde cada Actividad tiene un número ordenado (1, 2, 3, 4), un Código de Fase exacto (ej. 'NVCA 100', 'CONS 280', 'ADIC 416') y su Descripción textual.
+    2. **MATRIZ INFERIOR (CONTROL DE HORAS):** En la tabla de trabajadores, las columnas de horas están numeradas de izquierda a derecha como:
+       - Columna 1 de Fase (corresponde exactamente a la Actividad 1 superior).
+       - Columna 2 de Fase (corresponde exactamente a la Actividad 2 superior).
+       - Columna 3 de Fase (corresponde exactamente a la Actividad 3 superior).
+       - Columna 4 de Fase (corresponde exactamente a la Actividad 4 superior).
+    3. **REGLA ESTRICTA DE EXTRACCIÓN:** Para cada trabajador, verifica cuidadosamente celda por celda en qué columna de fase tiene horas registradas (> 0):
+       - Si tiene horas en la primera columna de fase, asígnale obligatoriamente el código de fase y la descripción de la **Actividad 1**.
+       - Si tiene horas en la segunda columna de fase, asígnale obligatoriamente el código de fase y la descripción de la **Actividad 2**.
+       - Si tiene horas en la tercera columna de fase, asígnale obligatoriamente el código de fase y la descripción de la **Actividad 3**.
+       - Si tiene horas en la cuarta columna de fase, asígnale obligatoriamente el código de fase y la descripción de la **Actividad 4**.
+    4. Genera una fila independiente en 'detalles_fases' por cada columna donde el trabajador tenga horas, respetando fielmente este orden posicional de columnas. No cruces ni inviertas las descripciones.
     
-    Extrae rigurosamente la fecha, frente, jefe de grupo, DNI, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas. Si encuentras celdas vacías o ambiguas en las fases, omítelas y procesa únicamente las que tengan horas reales mayores a cero.
+    Extrae también con precisión la fecha, frente, jefe de grupo, DNI, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas.
     """
 
     for intento in range(1, intentos_max + 1):
