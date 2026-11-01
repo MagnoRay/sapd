@@ -28,13 +28,24 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
     prompt = """
     Analiza la imagen adjunta correspondiente a un Parte Diario de Asistencia de personal de construcción.
     
-    INSTRUCCIÓN CRÍTICA DE ASOCIACIÓN DINÁMICA (ACTIVIDAD - FASE - DESCRIPCIÓN - HORAS):
-    1. En la parte superior de la hoja existe una tabla de "DESCRIPCION DE LOS TRABAJOS" donde cada Actividad (1, 2, 3, 4...) está enlazada inequívocamente a un Código de Fase (ej. 'CONS 280', 'ADIC416', 'NVCA 100') y a su respectiva descripción textual del trabajo.
-    2. En la parte inferior, cada trabajador posee una matriz de control de horas dividida por columnas de fases (Fase 01, Fase 02, Fase 03, etc.).
-    3. Debes cruzar la información de manera rigurosa: si un trabajador tiene horas en una columna de fase específica, busca arriba cuál es el código de fase exacto y su descripción de trabajo correspondiente, y asígnalos conjuntamente en 'detalles_fases'.
-    4. Genera una fila o elemento independiente por cada fase en la que el trabajador registre horas mayores a cero, garantizando que la descripción y el código de fase correspondan exactamente a lo indicado en la cabecera superior del formato, sin importar si cambia la posición o el diseño en este documento.
+    INSTRUCCIÓN CRÍTuCA DE ASOCIACIÓN EXACTA (ACTIVIDAD - FASE - DESCRIPCIÓN - HORAS):
+    1. En la parte superior izquierda existe una tabla de "DESCRIPCION DE LOS TRABAJOS" donde cada Actividad está enumerada exactamente así:
+       - Actividad 1 -> tiene su respectiva Descripción y su Código de Fase.
+       - Actividad 2 -> tiene su respectiva Descripción y su Código de Fase.
+       - Actividad 3 -> tiene su respectiva Descripción y su Código de Fase.
+       - Actividad 4 -> tiene su respectiva Descripción y su Código de Fase.
+    2. En la parte inferior, la matriz de control de horas por trabajador se divide en columnas numeradas:
+       - 'Fase 01' corresponde estrictamente a la Actividad 1.
+       - 'Fase 02' corresponde estrictamente a la Actividad 2.
+       - 'Fase 03' corresponde estrictamente a la Actividad 3.
+       - 'Fase 04' corresponde estrictamente a la Actividad 4.
+    3. REGLA DE EXTRACCIÓN: Para cada trabajador, revisa qué valor de horas tiene en cada columna ('Fase 01', 'Fase 02', etc.). Si tiene horas en dicha columna (por ejemplo, 10 horas en Fase 02), debes generar una fila/detalle independiente que contenga:
+       - El código de fase exacto de la Actividad 2 (ej. CONS280).
+       - La descripción textual exacta de la Actividad 2 (ej. Vaciado de loza).
+       - Las horas exactas registradas en esa fase.
+    4. No mezcles las descripciones ni asignes fases incorrectas; respeta rigurosamente el índice numérico (Fase 01 con Act. 1, Fase 02 con Act. 2, etc.).
     
-    Extrae también la fecha, frente, jefe de grupo, DNI, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas. Si encuentras alguna incongruencia, marca el estado 'REVISAR' en la observación.
+    Extrae también la fecha, frente, jefe de grupo, DNI, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas. Si hay alguna discrepancia, asigna el estado 'REVISAR' en la observación.
     """
 
     for intento in range(1, intentos_max + 1):
