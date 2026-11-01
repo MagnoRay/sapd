@@ -28,18 +28,18 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
     prompt = """
     Analiza la imagen adjunta correspondiente a un Parte Diario de Asistencia de personal de construcción.
     
-    INSTRUCCIÓN CRÍTICA DE EXTRACCIÓN Y ASOCIACIÓN PLANA:
-    1. **ENCABEZADO DE LA PÁGINA:** Extrae la fecha, turno, proyecto, sector, frente, jefe de grupo y DNI del jefe si figura.
-    2. **TABLA SUPERIOR (ACTIVIDADES Y FASES):** Lee la lista superior de trabajos donde cada Actividad (1, 2, 3, 4...) tiene un Código de Fase exacto (ej. 'NU CA 100', 'Cons 280', 'ADIC416') y su Descripción textual del trabajo.
-    3. **MATRIZ INFERIOR (TRABAJADORES Y HORAS POR FASE):** 
-       - Las columnas de horas de la matriz inferior corresponden ordenadamente de izquierda a derecha a las actividades superiores (Fase 01 = Act. 1, Fase 02 = Act. 2, Fase 03 = Act. 3, Fase 04 = Act. 4).
-       - **REGLA DE REGISTROS MÚLTIPLES:** Por cada trabajador, si registra horas en más de una columna de fase (por ejemplo, tiene horas en Fase 01 y horas en Fase 02), **debes generar un registro independiente (una fila por cada fase)** en la lista de `registros`.
-       - Cada fila generada para el trabajador debe contener:
-         * Sus datos personales (dni, nombres_apellidos, cargo, ingreso, salida, H.N., 60%, 100%, total_horas).
-         * El **código de fase** y la **descripción de la actividad** exacta que le corresponde según la columna de fase analizada (respetando estrictamente el orden superior).
-         * Las **hh** (horas de esa fase específica).
-    
-    Verifica que los cálculos sean coherentes. Si todo es correcto, asigna el estado 'OK'; si hay discrepancias o ilegibilidad, asigna 'REVISAR' en el estado con su respectiva observación.
+    INSTRUCCIÓN CRÍTICA DE EXTRACCIÓN CONDICIONAL (SOLO FASES CON HORAS > 0):
+    1. **TABLA SUPERIOR (ACTIVIDADES Y FASES):** Identifica la lista de trabajos arriba a la izquierda. Cada Actividad tiene un número ordenado (1, 2, 3, 4), un Código de Fase exacto (ej. 'NU CA 100', 'CONS 280', 'ADIC 416') y una Descripción textual.
+    2. **MATRIZ INFERIOR (CONTROL DE HORAS POR FASE):** En la tabla de trabajadores, las columnas de horas están numeradas de izquierda a derecha:
+       - Fase 01 = Corresponde exclusivamente a la Actividad 1.
+       - Fase 02 = Corresponde exclusivamente a la Actividad 2.
+       - Fase 03 = Corresponde exclusivamente a la Actividad 3.
+       - Fase 04 = Corresponde exclusivamente a la Actividad 4.
+    3. **REGLA DE FILTRADO ESTRICTO (¡MUY IMPORTANTE!):** 
+       - **SOLO** debes generar un registro (una fila en la lista) si el trabajador tiene **horas mayores a cero (> 0)** en esa columna de fase específica.
+       - Si una fase está vacía o tiene 0 horas para ese trabajador, **NO LA GENERES**.
+       - Por ejemplo, si un trabajador solo laboró 11 horas en la *Fase 04*, debes generar **únicamente 1 registro** que contenga el código de fase y la descripción exacta que le pertenece a la **Actividad 4**, con sus 11 horas. No agregues filas de las otras fases si no tienen horas.
+    4. Extrae también con precisión la fecha, turno, proyecto, sector, frente, jefe de grupo, DNI del jefe, DNI del trabajador, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas.
     """
 
     for intento in range(1, intentos_max + 1):
