@@ -4,7 +4,11 @@ import os
 # Añade la raíz del proyecto al path de Python para evitar errores de importación en Streamlit Cloud
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import time
+import io
+import fitz  # PyMuPDF para extracción y conversión optimizada de PDF
+from PIL import Image
 import streamlit as st
+
 from src.convertidor_pdf import convertir_pdf_a_imagenes, cargar_imagen_directa
 from src.ia_vision_engine import procesar_pagina_parte_diario
 from src.gestor_excel import generar_excel_asistencia
@@ -14,6 +18,30 @@ st.set_page_config(
     page_icon="👷‍♂️",
     layout="wide"
 )
+
+def procesar_pdf_optimizado(archivo_bytes: bytes):
+    """
+    Convierte las páginas del PDF a imágenes PIL optimizadas en resolución (150 DPI) 
+    y dimensiones (máx 1200px de ancho) para reducir drásticamente el consumo de tokens y costos en Gemini.
+    """
+    doc = fitz.open(stream=archivo_bytes, filetype="pdf")
+    imagenes_optimizadas = []
+    
+    for pagina in doc:
+        # Renderizar página a 150 DPI (suficiente legibilidad para OCR/Visión)
+        pix = pagina.get_pixmap(dpi=150)
+        img_pil = Image.open(io.BytesIO(pix.tobytes("jpeg")))
+        
+        # Redimensionar ancho máximo manteniendo proporción
+        ancho_max = 1200
+        if img_pil.width > ancho_max:
+            ratio = ancho_max / float(img_pil.width)
+            alto_max = int(float(img_pil.height) * ratio)
+            img_pil = img_pil.resize((ancho_max, alto_max), Image.Resampling.LANCZOS)
+            
+        imagenes_optimizadas.append(img_pil)
+        
+    return imagenes_optimizadas
 
 def main():
     st.title("👷‍♂️ Sistema Automatizado de Partes Diarios - Régimen C. Civil")
@@ -39,7 +67,8 @@ def main():
                 try:
                     archivo_bytes = archivo.read()
                     if archivo.name.lower().endswith(".pdf"):
-                        imagenes = convertir_pdf_a_imagenes(archivo_bytes)
+                        # Uso de la función optimizada en costos para PDFs
+                        imagenes = procesar_pdf_optimizado(archivo_bytes)
                     else:
                         imagenes = [cargar_imagen_directa(archivo_bytes)]
 
@@ -72,7 +101,7 @@ def main():
                         else:
                             st.warning(f"⚠️ {nombre_pag}: No se extrajeron registros.")
                         
-                        # Pausa de cortesía entre páginas para evitar saturar la cuota gratuita (429)
+                        # Pausa de cortesía entre páginas para evitar saturar la cuota (429)
                         if idx < total_paginas - 1:
                             time.sleep(6)
 
