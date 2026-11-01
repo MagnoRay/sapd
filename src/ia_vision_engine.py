@@ -24,14 +24,16 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
     """
     client = obtener_cliente_genai()
 
+    # PROMPT ACTUALIZADO: Instrucción estricta para desglosar múltiples fases y horas por trabajador
     prompt = """
     Analiza la imagen adjunta correspondiente a un Parte Diario de Asistencia de personal de construcción.
     Extrae todos los registros de trabajadores manteniendo la fidelidad de los datos impresos y manuscritos.
     
-    Reglas de extracción:
-    - Extrae fecha, turno, proyecto, sector, frente, jefe de grupo y DNI del jefe si figura en la cabecera.
-    - Extrae la lista completa de trabajadores con sus nombres, DNI, horas hombre (HH), código de fase, descripción de actividad, horas de ingreso y salida, horas normales (HN), horas 60%, horas 100% y total de horas.
-    - Si algún dato es ambiguo o con descuadre, asigna el estado 'REVISAR' y detalla la observación; de lo contrario asigna 'OK'.
+    Reglas críticas de extracción y distribución de fases:
+    1. Extrae fecha, turno, proyecto, sector, frente, jefe de grupo y DNI del jefe si figura en la cabecera.
+    2. DESGLOSE DE FASES Y HORAS: Si un trabajador tiene horas distribuidas en múltiples fases (por ejemplo, parte de sus horas en la Fase 01 con un código como ADIC416 y otras en la Fase 02 con un código como RELL200), **debes generar registros o elementos independientes por cada combinación de actividad, fase y sus respectivas horas hombre**. No agrupes ni resumas todo en una sola línea si las actividades o fases son distintas.
+    3. Extrae para cada línea o detalle: nombres, DNI, horas hombre (HH), código de fase, descripción de actividad, horas de ingreso y salida, horas normales (HN), horas 60%, horas 100% y total de horas.
+    4. Si algún dato es ambiguo o con descuadre, asigna el estado 'REVISAR' y detalla la observación; de lo contrario asigna 'OK'.
     """
 
     for intento in range(1, intentos_max + 1):
