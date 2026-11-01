@@ -27,13 +27,14 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
     # PROMPT ACTUALIZADO: Instrucción estricta para desglosar múltiples fases y horas por trabajador
     prompt = """
     Analiza la imagen adjunta correspondiente a un Parte Diario de Asistencia de personal de construcción.
-    Extrae todos los registros de trabajadores manteniendo la fidelidad de los datos impresos y manuscritos.
     
-    Reglas críticas de extracción y distribución de fases:
-    1. Extrae fecha, turno, proyecto, sector, frente, jefe de grupo y DNI del jefe si figura en la cabecera.
-    2. DESGLOSE DE FASES Y HORAS: Si un trabajador tiene horas distribuidas en múltiples fases (por ejemplo, parte de sus horas en la Fase 01 con un código como ADIC416 y otras en la Fase 02 con un código como RELL200), **debes generar registros o elementos independientes por cada combinación de actividad, fase y sus respectivas horas hombre**. No agrupes ni resumas todo en una sola línea si las actividades o fases son distintas.
-    3. Extrae para cada línea o detalle: nombres, DNI, horas hombre (HH), código de fase, descripción de actividad, horas de ingreso y salida, horas normales (HN), horas 60%, horas 100% y total de horas.
-    4. Si algún dato es ambiguo o con descuadre, asigna el estado 'REVISAR' y detalla la observación; de lo contrario asigna 'OK'.
+    INSTRUCCIÓN CRÍTICA DE ASOCIACIÓN DINÁMICA (ACTIVIDAD - FASE - DESCRIPCIÓN - HORAS):
+    1. En la parte superior de la hoja existe una tabla de "DESCRIPCION DE LOS TRABAJOS" donde cada Actividad (1, 2, 3, 4...) está enlazada inequívocamente a un Código de Fase (ej. 'CONS 280', 'ADIC416', 'NVCA 100') y a su respectiva descripción textual del trabajo.
+    2. En la parte inferior, cada trabajador posee una matriz de control de horas dividida por columnas de fases (Fase 01, Fase 02, Fase 03, etc.).
+    3. Debes cruzar la información de manera rigurosa: si un trabajador tiene horas en una columna de fase específica, busca arriba cuál es el código de fase exacto y su descripción de trabajo correspondiente, y asígnalos conjuntamente en 'detalles_fases'.
+    4. Genera una fila o elemento independiente por cada fase en la que el trabajador registre horas mayores a cero, garantizando que la descripción y el código de fase correspondan exactamente a lo indicado en la cabecera superior del formato, sin importar si cambia la posición o el diseño en este documento.
+    
+    Extrae también la fecha, frente, jefe de grupo, DNI, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas. Si encuentras alguna incongruencia, marca el estado como 'REVISAR' en la observación.
     """
 
     for intento in range(1, intentos_max + 1):
