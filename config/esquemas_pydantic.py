@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 class RegistroTrabajadorPlano(BaseModel):
     pagina: Optional[int] = Field(default=1, description="Número de página de origen dentro del PDF")
@@ -23,6 +23,13 @@ class RegistroTrabajadorPlano(BaseModel):
     total_horas: float = Field(description="Total Horas Reales")
     estado: str = Field(description="'OK' si todo coincide perfectamente, 'REVISAR' si hay descuadres o ilegibilidad")
     observaciones: Optional[str] = Field(default="", description="Detalle de la observación si el estado es REVISAR")
+
+    # --- LÍNEA AGREGADA PARA EL DNI ---
+    @field_validator('dni')
+    @classmethod
+    def validar_dni_sin_relleno(cls, v: str) -> str:
+        # Extrae únicamente los dígitos numéricos que leyó la IA, sin rellenar ni inventar ceros
+        return "".join(filter(str.isdigit, str(v)))
 
 class ParteDiarioPaginaEsquema(BaseModel):
     registros: List[RegistroTrabajadorPlano] = Field(description="Lista de trabajadores registrados en esta página")
