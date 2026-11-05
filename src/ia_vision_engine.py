@@ -38,8 +38,12 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
     3. **REGLA DE FILTRADO ESTRICTO (¡MUY IMPORTANTE!):** 
        - **SOLO** debes generar un registro (una fila en la lista) si el trabajador tiene **horas mayores a cero (> 0)** en esa columna de fase específica.
        - Si una fase está vacía o tiene 0 horas para ese trabajador, **NO LA GENERES**.
-       - Por ejemplo, si un trabajador solo laboró 11 horas en la *Fase 04*, debes generar **únicamente 1 registro** que contenga el código de fase y la descripción exacta que le pertenece a la **Actividad 4**, con sus 11 horas. No agregues filas de las otras fases si no tienen horas.
-    4. Extrae también con precisión la fecha, turno, proyecto, sector, frente, jefe de grupo, DNI del jefe, DNI del trabajador, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas.
+       - Por ejemplo, si un trabajador solo laboró en la *Fase 04*, debes generar **únicamente 1 registro** que contenga el código de fase y la descripción exacta que le pertenece a la **Actividad 4**. No agregues filas de las otras fases si no tienen horas.
+    4. **LECTURA ESTRICTA DE DNI Y ESTADOS:**
+       - Extrae los números del DNI tal como figuran impresos en el documento físico. 
+       - Si el DNI tiene menos de 8 dígitos (por error humano de llenado en obra), extráelo exactamente tal cual, **bajo ninguna circunstancia inventes ni agregues ceros a la izquierda**.
+       - Si detectas que un DNI está incompleto o ilegible, coloca obligatoriamente en el campo **estado**: 'REVISAR' y en **observaciones**: 'DNI incompleto en origen'. Si tiene sus 8 dígitos correctos, asigna 'OK'.
+    5. Extrae con absoluta precisión la fecha, turno, proyecto, sector, frente, jefe de grupo, DNI del jefe, DNI del trabajador, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas.
     """
 
     for intento in range(1, intentos_max + 1):
