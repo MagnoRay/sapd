@@ -43,7 +43,7 @@ def procesar_pagina_parte_diario(imagen_pil: Image.Image, nombre_archivo: str = 
        - Extrae los números del DNI tal como figuran impresos en el documento físico. 
        - Si el DNI tiene menos de 8 dígitos (por error humano de llenado en obra), extráelo exactamente tal cual, **bajo ninguna circunstancia inventes ni agregues ceros a la izquierda**.
        - Si detectas que un DNI está incompleto o ilegible, coloca obligatoriamente en el campo **estado**: 'REVISAR' y en **observaciones**: 'DNI incompleto en origen'. Si tiene sus 8 dígitos correctos, asigna 'OK'.
-    5. Extrae con absoluta precisión la fecha, turno, proyecto, sector, frente, jefe de grupo, DNI del jefe, DNI del trabajador, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas.
+    5. Extrae con absoluta precisión la fecha, turno, proyecto, sector, frente, jefe de grupo, DNI del trabajador, nombres, cargo, horas de ingreso, salida, H.N., 60%, 100% y total de horas.
     """
 
     for intento in range(1, intentos_max + 1):

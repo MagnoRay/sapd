@@ -9,7 +9,7 @@ def generar_excel_asistencia(registros):
 
     headers = [
         "PÁGINA", "FECHA", "TURNO", "PROYECTO", "SECTOR", "FRENTE", 
-        "JEFE DE GRUPO", "DNI JEFE", "TRABAJADOR", "DNI", 
+        "JEFE DE GRUPO", "TRABAJADOR", "DNI", 
         "HH", "FASE", "CONTROL ACTIVIDAD", "HORA INGRESO", "HORA SALIDA", 
         "H.N.", "HORAS 60%", "HORAS 100%", "TOTAL HORAS", "ESTADO", "OBSERVACIONES"
     ]
@@ -25,7 +25,6 @@ def generar_excel_asistencia(registros):
             r.sector,
             r.frente,
             r.jefe_grupo,
-            r.dni_jefe,
             r.nombres_apellidos,
             r.dni,
             r.hh,

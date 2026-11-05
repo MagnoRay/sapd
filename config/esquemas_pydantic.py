@@ -9,7 +9,6 @@ class RegistroTrabajadorPlano(BaseModel):
     sector: str = Field(description="Sector u Obra")
     frente: str = Field(description="Frente de trabajo")
     jefe_grupo: str = Field(description="Jefe de grupo o capataz")
-    dni_jefe: Optional[str] = Field(default="", description="DNI del Jefe de Grupo si figura")
     nombres_apellidos: str = Field(description="Apellidos y Nombres del trabajador")
     dni: str = Field(description="DNI o documento del trabajador")
     hh: float = Field(description="Total Horas Hombre (HH)")
