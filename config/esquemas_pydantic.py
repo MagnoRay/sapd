@@ -30,5 +30,12 @@ class RegistroTrabajadorPlano(BaseModel):
         # Extrae únicamente los dígitos numéricos que leyó la IA, sin rellenar ni inventar ceros
         return "".join(filter(str.isdigit, str(v)))
 
+    # --- LÍNEA AGREGADA PARA FORZAR MAYÚSCULAS EN CONTROL DE ACTIVIDAD ---
+    @field_validator('control_actividad')
+    @classmethod
+    def forzar_mayusculas_actividad(cls, v: str) -> str:
+        # Convierte todo el texto de la actividad a mayúsculas automáticamente
+        return str(v).upper() if v else ""
+
 class ParteDiarioPaginaEsquema(BaseModel):
     registros: List[RegistroTrabajadorPlano] = Field(description="Lista de trabajadores registrados en esta página")
