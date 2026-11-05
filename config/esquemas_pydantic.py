@@ -23,19 +23,26 @@ class RegistroTrabajadorPlano(BaseModel):
     estado: str = Field(description="'OK' si todo coincide perfectamente, 'REVISAR' si hay descuadres o ilegibilidad")
     observaciones: Optional[str] = Field(default="", description="Detalle de la observación si el estado es REVISAR")
 
-    # --- LÍNEA AGREGADA PARA EL DNI ---
+    # --- Validador para el DNI ---
     @field_validator('dni')
     @classmethod
     def validar_dni_sin_relleno(cls, v: str) -> str:
-        # Extrae únicamente los dígitos numéricos que leyó la IA, sin rellenar ni inventar ceros
         return "".join(filter(str.isdigit, str(v)))
 
-    # --- LÍNEA AGREGADA PARA FORZAR MAYÚSCULAS EN CONTROL DE ACTIVIDAD ---
+    # --- Validador para Control de Actividad (Mayúsculas) ---
     @field_validator('control_actividad')
     @classmethod
     def forzar_mayusculas_actividad(cls, v: str) -> str:
-        # Convierte todo el texto de la actividad a mayúsculas automáticamente
         return str(v).upper() if v else ""
+
+    # --- LÍNEA AGREGADA PARA LA FASE (Mayúsculas, sin espacios y sin guiones) ---
+    @field_validator('fase')
+    @classmethod
+    def formatear_fase(cls, v: str) -> str:
+        if not v:
+            return ""
+        # Convierte a mayúsculas, elimina espacios y quita los guiones (-)
+        return str(v).upper().replace(" ", "").replace("-", "")
 
 class ParteDiarioPaginaEsquema(BaseModel):
     registros: List[RegistroTrabajadorPlano] = Field(description="Lista de trabajadores registrados en esta página")
