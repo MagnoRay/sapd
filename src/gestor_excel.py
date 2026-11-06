@@ -49,6 +49,9 @@ def generar_excel_asistencia(registros):
         cell.font = header_font
         cell.alignment = Alignment(horizontal="center", vertical="center")
 
+    # --- LÍNEA AGREGADA PARA ACTIVAR LOS FILTROS AUTOMÁTICOS ---
+    ws.auto_filter.ref = ws.dimensions
+
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
