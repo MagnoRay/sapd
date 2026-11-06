@@ -42,7 +42,7 @@ class RegistroTrabajadorPlano(BaseModel):
         if not v:
             return ""
         # Convierte a mayúsculas, elimina espacios y quita los guiones (-)
-        return str(v).upper().replace(" ", "").replace("-", "")
+        return str(v).upper().replace(" ", "").replace("-", "").replace(".", "")
 
 class ParteDiarioPaginaEsquema(BaseModel):
     registros: List[RegistroTrabajadorPlano] = Field(description="Lista de trabajadores registrados en esta página")
