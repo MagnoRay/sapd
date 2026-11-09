@@ -1,0 +1,182 @@
+/* Ocultar elementos nativos molestos de Streamlit */
+#MainMenu, footer, header, [data-testid="collapsedControl"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+.stApp {
+    background-color: #f4f6f9 !important;
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* --- SIDEBAR NATIVO FORZADO A SER VISIBLE Y FIJO (ADMINLTE4) --- */
+[data-testid="stSidebar"] {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    height: 100vh !important;
+    background-color: #212529 !important;
+    color: #c2c7d0 !important;
+    z-index: 1040 !important;
+    border-right: 1px solid #4b545c !important;
+    padding: 15px 10px !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    visibility: visible !important;
+    display: block !important;
+    transition: width 0.3s ease-in-out;
+}
+
+/* Forzar fondo del contenedor interior del sidebar */
+[data-testid="stSidebar"] > div:first-child {
+    background-color: #212529 !important;
+    height: 100% !important;
+}
+
+/* Estilizar el input de búsqueda del sidebar */
+[data-testid="stSidebar"] input {
+    background-color: #343a40 !important;
+    color: #fff !important;
+    border: 1px solid #4b545c !important;
+    border-radius: 4px !important;
+}
+
+[data-testid="stSidebar"] .stMarkdown, 
+[data-testid="stSidebar"] span, 
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p {
+    color: #c2c7d0 !important;
+}
+
+/* Botones del menú lateral idénticos a AdminLTE4 */
+[data-testid="stSidebar"] .stButton > button {
+    width: 100% !important;
+    background-color: transparent !important;
+    color: #c2c7d0 !important;
+    border: none !important;
+    text-align: left !important;
+    padding: 10px 12px !important;
+    border-radius: 4px !important;
+    font-size: 0.95rem !important;
+    box-shadow: none !important;
+    transition: background-color 0.2s, color 0.2s;
+    margin-bottom: 4px;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* --- NAVBAR SUPERIOR FIJO --- */
+.adminlte-navbar {
+    position: fixed;
+    top: 0;
+    left: 260px;
+    right: 0;
+    height: 60px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 1030;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    transition: left 0.3s ease-in-out;
+}
+
+/* --- FOOTER FIJO --- */
+.adminlte-footer {
+    position: fixed;
+    bottom: 0;
+    left: 260px;
+    right: 0;
+    height: 40px;
+    background-color: #212529;
+    color: #869099;
+    padding: 0 20px;
+    font-size: 0.85rem;
+    border-top: 1px solid #4b545c;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1020;
+    transition: left 0.3s ease-in-out;
+}
+
+.adminlte-footer a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+/* --- CONTENIDO PRINCIPAL Y CENTRADO DEL DASHBOARD (CON POCA SEPARACIÓN SUPERIOR) --- */
+.main-content-area {
+    width: 100% !important;
+    background-color: #f4f6f9 !important;
+    box-sizing: border-box !important;
+}
+
+.main-content-wrapper {
+    width: 100% !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+}
+
+.main-content-area [data-testid="stVerticalBlock"] {
+    width: 100% !important;
+}
+
+/* Forzar que los contenedores nativos internos de Streamlit se ajusten al espacio libre y se centren */
+.stMain, [data-testid="stMain"] {
+    margin-left: 260px !important;
+    width: calc(100% - 260px) !important;
+    background-color: #f4f6f9 !important;
+    transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.stMainBlockContainer, .block-container {
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+    padding-top: 55px !important; /* Distancia exacta debajo del navbar fijo de 60px */
+    padding-bottom: 3rem !important;
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+}
+
+/* --- ESTADO COLAPSADO (HAMBURGUESA) --- */
+body.sidebar-collapse [data-testid="stSidebar"] {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+}
+
+body.sidebar-collapse [data-testid="stSidebar"] span,
+body.sidebar-collapse [data-testid="stSidebar"] input,
+body.sidebar-collapse [data-testid="stSidebar"] label {
+    display: none !important;
+}
+
+body.sidebar-collapse .adminlte-navbar,
+body.sidebar-collapse .adminlte-footer,
+body.sidebar-collapse .main-content-area {
+    margin-left: 70px !important;
+    left: 70px !important;
+    width: calc(100vw - 70px) !important;
+}
+
+body.sidebar-collapse .stMain, 
+body.sidebar-collapse [data-testid="stMain"] {
+    margin-left: 70px !important;
+    width: calc(100% - 70px) !important;
+}
