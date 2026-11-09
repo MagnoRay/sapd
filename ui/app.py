@@ -1,13 +1,13 @@
 import sys
 import os
-
-# Añade la raíz del proyecto al path de Python para evitar errores de importación en Streamlit Cloud
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import time
 import io
-import fitz  # PyMuPDF para extracción y conversión optimizada de PDF
+import pymupdf
 from PIL import Image
 import streamlit as st
+
+# Añade la raíz del proyecto al path de Python
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.convertidor_pdf import convertir_pdf_a_imagenes, cargar_imagen_directa
 from src.ia_vision_engine import procesar_pagina_parte_diario
@@ -16,23 +16,34 @@ from src.gestor_excel import generar_excel_asistencia
 st.set_page_config(
     page_title="Control de Asistencia - Régimen C. Civil",
     page_icon="👷‍♂️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
+# Cargar archivos CSS y JS externos
+def cargar_assets_interfaz():
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    css_path = os.path.join(base_dir, 'assets', 'css', 'custom.css')
+    js_path = os.path.join(base_dir, 'assets', 'js', 'custom.js')
+    
+    if os.path.exists(css_path):
+        with open(css_path, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+            
+    if os.path.exists(js_path):
+        with open(js_path, "r", encoding="utf-8") as f:
+            st.components.v1.html(f"<script>{f.read()}</script>", height=0)
+
+cargar_assets_interfaz()
+
 def procesar_pdf_optimizado(archivo_bytes: bytes):
-    """
-    Convierte las páginas del PDF a imágenes PIL optimizadas en resolución (150 DPI) 
-    y dimensiones (máx 1200px de ancho) para reducir drásticamente el consumo de tokens y costos en Gemini.
-    """
-    doc = fitz.open(stream=archivo_bytes, filetype="pdf")
+    doc = pymupdf.open(stream=archivo_bytes, filetype="pdf")
     imagenes_optimizadas = []
     
     for pagina in doc:
-        # Renderizar página a 150 DPI (suficiente legibilidad para OCR/Visión)
         pix = pagina.get_pixmap(dpi=150)
         img_pil = Image.open(io.BytesIO(pix.tobytes("jpeg")))
         
-        # Redimensionar ancho máximo manteniendo proporción
         ancho_max = 1200
         if img_pil.width > ancho_max:
             ratio = ancho_max / float(img_pil.width)
@@ -43,7 +54,7 @@ def procesar_pdf_optimizado(archivo_bytes: bytes):
         
     return imagenes_optimizadas
 
-def main():
+def render_horas_hombre():
     st.title("👷‍♂️ Sistema Automatizado de Partes Diarios - Régimen C. Civil")
     st.markdown("""
     Sube los archivos PDF o imágenes de los Partes Diarios. El sistema extraerá de forma continua y segura los datos de cada página, consolidando **todos los trabajadores en un único Excel plano de 20 columnas**.
@@ -67,7 +78,6 @@ def main():
                 try:
                     archivo_bytes = archivo.read()
                     if archivo.name.lower().endswith(".pdf"):
-                        # Uso de la función optimizada en costos para PDFs
                         imagenes = procesar_pdf_optimizado(archivo_bytes)
                     else:
                         imagenes = [cargar_imagen_directa(archivo_bytes)]
@@ -81,18 +91,16 @@ def main():
                     st.error(f"Error cargando {archivo.name}: {str(e)}")
 
             if paginas_a_procesar:
-                st.info(f"⚡ Procesando {len(paginas_a_procesar)} página(s) secuencialmente para cumplir con la cuota de la API...")
+                st.info(f"⚡ Procesando {len(paginas_a_procesar)} página(s) secuencialmente...")
                 barra_progreso = st.progress(0)
                 total_paginas = len(paginas_a_procesar)
 
                 for idx, (nombre_pag, img, num_pagina) in enumerate(paginas_a_procesar):
                     st.write(f"Analizando: **{nombre_pag}**...")
                     try:
-                        # Procesar página con reintento y pausa integrada
                         res_pagina = procesar_pagina_parte_diario(img, nombre_archivo=nombre_pag)
                         
                         if res_pagina and hasattr(res_pagina, "registros") and res_pagina.registros:
-                            # Se le asigna el número de página a cada registro
                             for reg in res_pagina.registros:
                                 reg.pagina = num_pagina
                                 todos_los_registros.append(reg)
@@ -101,7 +109,6 @@ def main():
                         else:
                             st.warning(f"⚠️ {nombre_pag}: No se extrajeron registros.")
                         
-                        # Pausa de cortesía entre páginas para evitar saturar la cuota (429)
                         if idx < total_paginas - 1:
                             time.sleep(6)
 
@@ -114,32 +121,125 @@ def main():
                 st.session_state["registros_consolidados"] = todos_los_registros
                 st.success(f"¡Procesamiento completo! Se consolidaron {len(todos_los_registros)} filas de asistencia.")
 
-        if "registros_consolidados" in st.session_state and st.session_state["registros_consolidados"]:
-            registros = st.session_state["registros_consolidados"]
-            st.markdown("---")
-            st.header(f"📊 Vista Previa de Asistencia ({len(registros)} Registros)")
+    if "registros_consolidados" in st.session_state and st.session_state["registros_consolidados"]:
+        registros = st.session_state["registros_consolidados"]
+        st.markdown("---")
+        st.header(f"📊 Vista Previa de Asistencia ({len(registros)} Registros)")
 
-            datos_df = [
-                {
-                    "PÁGINA": getattr(r, 'pagina', 1),
-                    "FECHA": r.fecha, "TURNO": r.turno, "PROYECTO": r.proyecto,
-                    "FRENTE": r.frente, "JEFE DE GRUPO": r.jefe_grupo,
-                    "TRABAJADOR": r.nombres_apellidos, "DNI": r.dni,
-                    "FASE": r.fase, "ACTIVIDAD": r.control_actividad,
-                    "HH": r.hh, "ESTADO": r.estado
-                }
-                for r in registros
-            ]
-            st.dataframe(datos_df, use_container_width=True)
+        datos_df = [
+            {
+                "PÁGINA": getattr(r, 'pagina', 1),
+                "FECHA": r.fecha, "TURNO": r.turno, "PROYECTO": r.proyecto,
+                "FRENTE": r.frente, "JEFE DE GRUPO": r.jefe_grupo,
+                "TRABAJADOR": r.nombres_apellidos, "DNI": r.dni,
+                "FASE": r.fase, "ACTIVIDAD": r.control_actividad,
+                "HH": r.hh, "ESTADO": r.estado
+            }
+            for r in registros
+        ]
+        st.dataframe(datos_df, use_container_width=True)
 
-            excel_bytes = generar_excel_asistencia(registros)
-            st.download_button(
-                label=f"📥 Descargar Excel Consolidado ({len(registros)} filas)",
-                data=excel_bytes,
-                file_name="Control_Asistencia_Consolidado.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                type="primary"
-            )
+        excel_bytes = generar_excel_asistencia(registros)
+        st.download_button(
+            label=f"📥 Descargar Excel Consolidado ({len(registros)} filas)",
+            data=excel_bytes,
+            file_name="Control_Asistencia_Consolidado.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="primary"
+        )
+
+def render_fixed_shell():
+    # Navbar Superior AdminLTE4
+    st.markdown("""
+        <div class="adminlte-navbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span style="font-size: 1.2rem; cursor: pointer; color: #495057;" onclick="window.parent.toggleAdminLTESidebar()">☰</span>
+                <span style="color: #495057; font-size: 0.9rem; cursor: pointer;">📱 Live preview</span>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <span style="position: absolute; left: 12px; color: #6c757d; font-size: 0.8rem;">🔍</span>
+                    <input type="text" style="background: #f4f6f9; border: 1px solid #ced4da; padding: 6px 12px 6px 32px; border-radius: 20px; font-size: 0.85rem; width: 220px; outline: none;" placeholder="Documentation">
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span style="cursor: pointer; color: #6c757d; font-size: 1rem;">💬</span>
+                <span style="cursor: pointer; color: #6c757d; font-size: 1rem;">🔔</span>
+                <span style="cursor: pointer; color: #6c757d; font-size: 1rem;">☀️</span>
+                <span style="cursor: pointer; color: #6c757d; font-size: 1rem;">⛶</span>
+                <div style="display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 4px 12px; border-radius: 20px; border: 1px solid #e9ecef; cursor: pointer;">
+                    <div style="background: #4b545c; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">AP</div>
+                    <span style="font-weight: 500; font-size: 0.85rem; color: #343a40;">Alexander Pierce</span>
+                </div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Footer Fijo AdminLTE4
+    st.markdown("""
+        <div class="adminlte-footer">
+            <div>
+                <strong>Copyright &copy; 2026-2026 <a href="" target="_blank">Sapd</a>.</strong> Todos los derechos reservados.
+            </div>
+            <div>
+                Todo lo que quieras
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+def main():
+    if "nav_opcion" not in st.session_state:
+        st.session_state["nav_opcion"] = "Horas Hombre"
+
+    # Renderizar Navbar y Footer fijos una sola vez
+    render_fixed_shell()
+
+    # Sidebar Nativo estilizado como el menú charcoal de AdminLTE4
+    with st.sidebar:
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 12px; padding: 5px 0 15px 0; border-bottom: 1px solid #4b545c; margin-bottom: 15px;">
+            <div style="background: #ffffff; color: #212529; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem;">A</div>
+            <span style="font-size: 1.3rem; font-weight: 300; color: #ffffff; letter-spacing: 1px;">SAPD</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.text_input("Filter menu...", key="filter_menu_input", label_visibility="collapsed", placeholder="Filter menu...")
+        
+        opciones = [
+            ("📊", "Dashboard", "Dashboard"),
+            ("👷‍♂️", "Horas Hombre", "Horas Hombre"),
+            ("🚜", "Horas Maquina", "Horas Maquina"),
+            ("💰", "Gasto", "Gasto"),
+            ("⚙️", "Configuración", "Configuración"),
+            ("📖", "Documentacion", "Documentacion")
+        ]
+
+        for icono, label, val in opciones:
+            es_activo = st.session_state["nav_opcion"] == val
+            btn_label = f"{icono}  {label}"
+            
+            if st.button(btn_label, key=f"nav_{val}", use_container_width=True, type="primary" if es_activo else "secondary"):
+                st.session_state["nav_opcion"] = val
+                st.rerun()
+
+    # Contenedor central con la clase wrapper para mantener el contenido centrado y desplazado del sidebar
+    st.markdown('<div class="main-content-area"><div class="main-content-wrapper">', unsafe_allow_html=True)
+
+    # Cabecera de la sección actual
+    st.markdown(f"""
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-weight: 400; color: #343a40; font-size: 1.5rem;">{st.session_state["nav_opcion"]}</h2>
+        <span style="color: #6c757d; font-size: 0.85rem;">Home / {st.session_state["nav_opcion"]}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Renderizar módulo activo
+    if st.session_state["nav_opcion"] == "Horas Hombre":
+        render_horas_hombre()
+    elif st.session_state["nav_opcion"] == "Dashboard":
+        st.info("📊 Panel de control principal (Dashboard).")
+    else:
+        st.info(f"Módulo **{st.session_state['nav_opcion']}** en desarrollo.")
+
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
