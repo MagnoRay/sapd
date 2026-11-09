@@ -46,6 +46,16 @@
     border-radius: 4px !important;
 }
 
+/* Placeholder claro para el buscador */
+[data-testid="stSidebar"] input::placeholder {
+    color: #ced4da !important;
+    opacity: 1 !important;
+}
+[data-testid="stSidebar"] input::-webkit-input-placeholder { color: #ced4da !important; }
+[data-testid="stSidebar"] input:-moz-placeholder { color: #ced4da !important; }
+[data-testid="stSidebar"] input::-moz-placeholder { color: #ced4da !important; }
+[data-testid="stSidebar"] input:-ms-input-placeholder { color: #ced4da !important; }
+
 [data-testid="stSidebar"] .stMarkdown, 
 [data-testid="stSidebar"] span, 
 [data-testid="stSidebar"] label,
@@ -53,19 +63,38 @@
     color: #c2c7d0 !important;
 }
 
-/* Botones del menú lateral idénticos a AdminLTE4 */
+/* --- BOTONES DEL MENÚ LATERAL FORZADOS A LA IZQUIERDA --- */
+[data-testid="stSidebar"] .stButton {
+    width: 100% !important;
+    text-align: left !important;
+}
+
 [data-testid="stSidebar"] .stButton > button {
     width: 100% !important;
     background-color: transparent !important;
     color: #c2c7d0 !important;
     border: none !important;
     text-align: left !important;
-    padding: 10px 12px !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 10px 15px !important;
     border-radius: 4px !important;
     font-size: 0.95rem !important;
     box-shadow: none !important;
     transition: background-color 0.2s, color 0.2s;
     margin-bottom: 4px;
+}
+
+/* Forzar que los divs internos y elementos internos del botón de Streamlit no centren el texto */
+[data-testid="stSidebar"] .stButton > button div,
+[data-testid="stSidebar"] .stButton > button p,
+[data-testid="stSidebar"] .stButton > button span {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
 [data-testid="stSidebar"] .stButton > button:hover {
@@ -120,7 +149,7 @@
     text-decoration: none;
 }
 
-/* --- CONTENIDO PRINCIPAL Y CENTRADO DEL DASHBOARD (CON POCA SEPARACIÓN SUPERIOR) --- */
+/* --- CONTENIDO PRINCIPAL Y POSICIONAMIENTO PERFECTO DEBAJO DEL NAVBAR --- */
 .main-content-area {
     width: 100% !important;
     background-color: #f4f6f9 !important;
@@ -137,7 +166,7 @@
     width: 100% !important;
 }
 
-/* Forzar que los contenedores nativos internos de Streamlit se ajusten al espacio libre y se centren */
+/* Forzar que los contenedores nativos internos de Streamlit se ajusten al espacio libre */
 .stMain, [data-testid="stMain"] {
     margin-left: 260px !important;
     width: calc(100% - 260px) !important;
@@ -148,7 +177,7 @@
 .stMainBlockContainer, .block-container {
     max-width: 1100px !important;
     margin: 0 auto !important;
-    padding-top: 55px !important; /* Distancia exacta debajo del navbar fijo de 60px */
+    padding-top: 55px !important; /* Distancia óptima debajo del navbar fijo de 60px */
     padding-bottom: 3rem !important;
     padding-left: 30px !important;
     padding-right: 30px !important;
