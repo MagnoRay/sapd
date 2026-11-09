@@ -154,17 +154,17 @@ def render_fixed_shell():
         <div class="adminlte-navbar">
             <div style="display: flex; align-items: center; gap: 16px;">
                 <span style="font-size: 1.2rem; cursor: pointer; color: #495057;" onclick="window.parent.toggleAdminLTESidebar()">☰</span>
-                <span style="color: #495057; font-size: 0.9rem; cursor: pointer;">📱 Live preview</span>
+                <span style="color: #495057; font-size: 1rem; cursor: pointer;">📱 Live preview</span>
                 <div style="position: relative; display: flex; align-items: center;">
-                    <span style="position: absolute; left: 12px; color: #6c757d; font-size: 0.8rem;">🔍</span>
+                    <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6c757d; font-size: 1.4rem;">⌕</span>
                     <input type="text" style="background: #f4f6f9; border: 1px solid #ced4da; padding: 6px 12px 6px 32px; border-radius: 20px; font-size: 0.85rem; width: 220px; outline: none;" placeholder="Documentation">
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 16px;">
-                <span style="cursor: pointer; color: #6c757d; font-size: 1rem;">💬</span>
-                <span style="cursor: pointer; color: #6c757d; font-size: 1rem;">🔔</span>
-                <span style="cursor: pointer; color: #6c757d; font-size: 1rem;">☀️</span>
-                <span style="cursor: pointer; color: #6c757d; font-size: 1rem;">⛶</span>
+                <span style="cursor: pointer; color: #6c757d; font-size: 1.3rem;">🗩</span>
+                <span style="cursor: pointer; color: #6c757d; font-size: 1.3rem;">✉</span>
+                <span style="cursor: pointer; color: #6c757d; font-size: 1.3rem;">☀</span>
+                <span style="cursor: pointer; color: #6c757d; font-size: 1.3rem;">⛶</span>
                 <div style="display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 4px 12px; border-radius: 20px; border: 1px solid #e9ecef; cursor: pointer;">
                     <div style="background: #4b545c; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">AP</div>
                     <span style="font-weight: 500; font-size: 0.85rem; color: #343a40;">Alexander Pierce</span>
@@ -195,13 +195,13 @@ def main():
     # Sidebar Nativo estilizado como el menú charcoal de AdminLTE4
     with st.sidebar:
         st.markdown("""
-        <div style="display: flex; align-items: center; gap: 12px; padding: 5px 0 15px 0; border-bottom: 1px solid #4b545c; margin-bottom: 15px;">
-            <div style="background: #ffffff; color: #212529; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem;">A</div>
-            <span style="font-size: 1.3rem; font-weight: 300; color: #ffffff; letter-spacing: 1px;">SAPD</span>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 5px 0 15px 0; border-bottom: 1px solid #4b545c; margin-bottom: 15px;">
+            <div style="background: #ffffff; color: #212529; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem;">S</div>
+            <strong style="font-size: 1.3rem; color: #ffffff; letter-spacing: 1px;">APD</strong>
         </div>
         """, unsafe_allow_html=True)
         
-        st.text_input("Filter menu...", key="filter_menu_input", label_visibility="collapsed", placeholder="Filter menu...")
+        st.text_input("Filter menu...", key="filter_menu_input", label_visibility="collapsed", placeholder="Filtro menu...")
         
         opciones = [
             ("📊", "Dashboard", "Dashboard"),
